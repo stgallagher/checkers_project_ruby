@@ -1,0 +1,1 @@
+require 'checkers_project'
