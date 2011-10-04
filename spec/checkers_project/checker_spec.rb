@@ -6,7 +6,8 @@ describe Checker do
   end
 
   it "should have a location" do
-    @sample_checker.location.should == [4, 5]
+    @sample_checker.x_pos.should == 4
+    @sample_checker.y_pos.should == 5
   end
 
   it "should know its color" do
