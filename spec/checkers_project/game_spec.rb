@@ -65,5 +65,42 @@ describe Game do
       @game.board[3][1].should == nil
       @game.board[4][2].should == nil
     end
+
+    it "should not allow non-diagonal moves" do
+      not_moving_checker = @game.board[2][4]
+      @game.move_validator(2, 4, 3, 4).should == "You can only move a checker diagonally"
+      @game.move_validator(2, 4, 2, 5).should == "You can only move a checker diagonally"
+      @game.board[2][4].should equal(not_moving_checker)
+      @game.board[3][4].should == nil
+      @game.board[2][5].should == nil
+    end
+
+    it "should not allow moves to occupied squares" do
+      pending
+    end
+
+    it "should not allow backwards moves if checker is not a king" do
+      pending
+    end
+
+    it "should allow backwards moves (if otherwise valid) if checker is a king" do
+      pending
+    end
+
+    it "should allow jumps if there is an opposing checker in place and a vacant spot to land" do
+      pending
+    end
+
+    it "should not allow jumps if there its over a players own checker" do
+      pending
+    end
+
+    it "should not allow jumps if there is no vacant space to land" do
+      pending
+    end
+
+    it "should force the player to jump if a jump is possible" do
+      pending
+    end 
   end
 end

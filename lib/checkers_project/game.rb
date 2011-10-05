@@ -55,7 +55,8 @@ class Game
       message = "You cannot move off the board"
     when no_checker_at_origin(coords) == true
       message = "There is no checker to move in requested location"
-
+    when attempted_non_diagonal_move(coords) == true
+      message = "You can only move a checker diagonally"
     end
 
     message
@@ -73,6 +74,15 @@ class Game
     y = coords[1]
     
     @board[x][y].nil?
+  end
+
+  def attempted_non_diagonal_move(coords)
+    x1 = coords[0]
+    y1 = coords[1]
+    x2 = coords[2]
+    y2 = coords[3]
+
+    (x1 == x2) or (y1 == y2)
   end
 
   def move(x_origin, y_origin, x_dest, y_dest)
