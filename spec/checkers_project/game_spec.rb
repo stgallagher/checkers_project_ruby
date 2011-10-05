@@ -48,8 +48,22 @@ describe Game do
       #puts @game.gui.render_board(@game.board)
     end
 
-    it "should not allow a move that is off the board" do
-      pending
+    it "should not allow a move that is off the board (to the right)" do
+      not_moving_checker = @game.board[2][0]
+      @game.move_validator(2, 0, 3, -1).should == "You cannot move off the board"
+      @game.board[2][0].should equal(not_moving_checker)
+    end
+    
+    it "should not allow a move that is off the board (to the left)" do
+      not_moving_checker = @game.board[1][7]
+      @game.move_validator(1, 7, 2, 8).should == "You cannot move off the board"
+      @game.board[1][7].should equal(not_moving_checker)
+    end
+
+    it "should error if requested moving checker is not at location specified" do
+      @game.move_validator(3, 1, 4, 2).should == "There is no checker to move in requested location"
+      @game.board[3][1].should == nil
+      @game.board[4][2].should == nil
     end
   end
 end

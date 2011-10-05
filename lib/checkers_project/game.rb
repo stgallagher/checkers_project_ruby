@@ -47,8 +47,36 @@ class Game
     end
   end
 
-  def move(x_origin, y_origin, x_dest, y_dest)
+  def move_validator(x_origin, y_origin, x_dest, y_dest)
+    coords = [x_origin, y_origin, x_dest, y_dest]
     
+    case 
+    when out_of_bounds(coords) == true
+      message = "You cannot move off the board"
+    when no_checker_at_origin(coords) == true
+      message = "There is no checker to move in requested location"
+
+    end
+
+    message
+  end
+  
+  def out_of_bounds(coords)
+    x = coords[2]
+    y = coords[3]
+
+   (x < 0  or y < 0) or (x > 7  or y > 7)
+  end
+
+  def no_checker_at_origin(coords)
+    x = coords[0]
+    y = coords[1]
+    
+    @board[x][y].nil?
+  end
+
+  def move(x_origin, y_origin, x_dest, y_dest)
+
     # get checker thats moving
     moving_checker = @board[x_origin][y_origin]
     
@@ -59,7 +87,5 @@ class Game
     # update board positions of checker
     @board[x_origin][y_origin] = nil
     @board[x_dest][y_dest] = moving_checker
-  
   end
-
 end
