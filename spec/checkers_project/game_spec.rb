@@ -76,11 +76,16 @@ describe Game do
     end
 
     it "should not allow moves to occupied squares" do
-      pending
+      moving_checker = @game.board[1][1]
+      stationary_checker = @game.board[2][2]
+      @game.move_validator(1, 1, 2, 2).should == "You cannot move to an occupied square"
+      @game.board[1][1].should equal(moving_checker)
+      @game.board[2][2].should equal(stationary_checker)
     end
 
     it "should not allow backwards moves if checker is not a king" do
-      pending
+      @game.move(2, 2, 3, 3)
+      @game.move_validator(3, 3, 2, 2).should == "A non-king checker cannot move backwards" 
     end
 
     it "should allow backwards moves (if otherwise valid) if checker is a king" do

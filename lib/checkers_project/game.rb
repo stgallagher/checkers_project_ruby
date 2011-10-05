@@ -57,8 +57,11 @@ class Game
       message = "There is no checker to move in requested location"
     when attempted_non_diagonal_move(coords) == true
       message = "You can only move a checker diagonally"
+    when attempted_move_to_occupied_square(coords) == true
+      message = "You cannot move to an occupied square"
+    when non_king_moving_backwards(coords) == true
+      message = "A non-king checker cannot move backwards"
     end
-
     message
   end
   
@@ -83,6 +86,21 @@ class Game
     y2 = coords[3]
 
     (x1 == x2) or (y1 == y2)
+  end
+
+  def attempted_move_to_occupied_square(coords)
+    x = coords[2]
+    y = coords[3]
+
+    not board[x][y].nil?
+  end
+  
+  def non_king_moving_backwards(coords)
+    x1 = coords[0]
+    y1 = coords[1]
+    x2 = coords[2]
+
+    (x2 < x1) and (board[x1][y1].isKing? == false)
   end
 
   def move(x_origin, y_origin, x_dest, y_dest)
