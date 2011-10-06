@@ -14,6 +14,12 @@ class Game
     @board
   end
   
+  def create_test_board
+    @board = Array.new(8)
+    8.times { |index| @board[index] = Array.new(8) }
+    @board
+  end
+
   def place_checker_on_board(checker)
     @board[checker.x_pos][checker.y_pos] = checker 
   end
@@ -61,10 +67,61 @@ class Game
       message = "You cannot move to an occupied square"
     when non_king_moving_backwards(coords) == true
       message = "A non-king checker cannot move backwards"
+    when attempted_jump_of_own_checker(coords)
+      message = "You cannot jump a checker of your own color"
+    else
+      move(coords[0], coords[1], coords[2], coords[3])
+      if jumping_move?(coords)
+        remove_jumped_checker(coords)
+      end
     end
     message
   end
   
+  def attempted_jump_of_own_checker(coords)
+    if jumping_move?(coords)
+      x1 = coords[0]
+      y1 = coords[1]
+      x2 = coords[2]
+      y2 = coords[3]
+    
+      x_delta = (x2 > x1) ? 1 : -1
+      y_delta = (y2 > y1) ? 1 : -1
+    
+      jumped_checker_x_value = x1 + x_delta
+      jumped_checker_y_value = y1 + y_delta
+    
+      jumped_checker = @board[jumped_checker_x_value][jumped_checker_y_value]
+      jumping_checker = @board[x1][y1]
+
+      jumped_checker.color == jumping_checker.color
+    end
+  end
+
+  def jumping_move?(coords)
+    x1 = coords[0]
+    y1 = coords[1]
+    x2 = coords[2]
+    y2 = coords[3]
+
+    (x2 - x1).abs > 1 
+  end
+  
+  def remove_jumped_checker(coords)
+    x1 = coords[0]
+    y1 = coords[1]
+    x2 = coords[2]
+    y2 = coords[3]
+    
+    x_delta = (x2 > x1) ? 1 : -1
+    y_delta = (y2 > y1) ? 1 : -1
+    
+    remove_checker_x_value = x1 + x_delta
+    remove_checker_y_value = y1 + y_delta
+    
+    @board[remove_checker_x_value][remove_checker_y_value] = nil
+  end
+
   def out_of_bounds(coords)
     x = coords[2]
     y = coords[3]

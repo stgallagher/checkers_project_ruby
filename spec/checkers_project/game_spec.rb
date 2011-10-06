@@ -89,19 +89,49 @@ describe Game do
     end
 
     it "should allow backwards moves (if otherwise valid) if checker is a king" do
-      pending
+      @game.create_test_board
+      king_checker = Checker.new(3, 3, :red)
+      king_checker.make_king
+      @game.place_checker_on_board(king_checker)
+      @game.move_validator(3, 3, 2, 2).should == nil
+      @game.board[2][2].should equal(king_checker)
     end
 
     it "should allow jumps if there is an opposing checker in place and a vacant spot to land" do
-      pending
+      @game.create_test_board
+      jumping_checker = Checker.new(3, 3, :red)
+      jumped_checker = Checker.new(4, 4, :black)
+      @game.place_checker_on_board(jumping_checker)
+      @game.place_checker_on_board(jumped_checker)
+      @game.move_validator(3, 3, 5, 5).should == nil
+      @game.board[5][5].should equal(jumping_checker)
+      @game.board[4][4].should == nil
     end
 
     it "should not allow jumps if there its over a players own checker" do
-      pending
+      @game.create_test_board
+      jumping_checker = Checker.new(3, 3, :red)
+      jumped_checker = Checker.new(4, 4, :red)
+      @game.place_checker_on_board(jumping_checker)
+      @game.place_checker_on_board(jumped_checker)
+      @game.move_validator(3, 3, 5, 5).should == "You cannot jump a checker of your own color"
+      @game.board[5][5].should == nil
+      @game.board[4][4].should equal(jumped_checker)
+      @game.board[3][3].should equal(jumping_checker)
     end
 
     it "should not allow jumps if there is no vacant space to land" do
-      pending
+      @game.create_test_board
+      jumping_checker = Checker.new(3, 3, :red)
+      jumped_checker = Checker.new(4, 4, :black)
+      blocking_checker = Checker.new(5, 5, :black)
+      @game.place_checker_on_board(jumping_checker)
+      @game.place_checker_on_board(jumped_checker)
+      @game.place_checker_on_board(blocking_checker)
+      @game.move_validator(3, 3, 5, 5).should == "You cannot move to an occupied square"
+      @game.board[5][5].should equal(blocking_checker) 
+      @game.board[4][4].should equal(jumped_checker)
+      @game.board[3][3].should equal(jumping_checker)
     end
 
     it "should force the player to jump if a jump is possible" do
