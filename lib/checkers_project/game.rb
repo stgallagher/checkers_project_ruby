@@ -4,6 +4,7 @@ class Game
 
   def initialize
     @gui = BasicGui.new
+    @current_player = :red
     create_board
   end
 
@@ -57,18 +58,27 @@ class Game
     coords = [x_origin, y_origin, x_dest, y_dest]
     
     case 
-    when out_of_bounds(coords) == true
+    when out_of_bounds?(coords) == true
       message = "You cannot move off the board"
+    
     when no_checker_at_origin(coords) == true
       message = "There is no checker to move in requested location"
+    
     when attempted_non_diagonal_move(coords) == true
       message = "You can only move a checker diagonally"
+    
     when attempted_move_to_occupied_square(coords) == true
       message = "You cannot move to an occupied square"
+    
     when non_king_moving_backwards(coords) == true
       message = "A non-king checker cannot move backwards"
+    
     when attempted_jump_of_own_checker(coords)
       message = "You cannot jump a checker of your own color"
+    
+    when jump_available_and_not_taken?(coords) == true
+      message = "You must jump if a jump is available"  
+    
     else
       move(coords[0], coords[1], coords[2], coords[3])
       if jumping_move?(coords)
@@ -78,6 +88,86 @@ class Game
     message
   end
   
+  def adjacent_positions(coords)
+    x1 = coords[0]
+    y1 = coords[1]
+    x2 = coords[2]
+    y2 = coords[3]
+
+    jump_positions = { "upper_left"  => board[x1 + 1][y1 + 1],
+                       "upper_right" => board[x1 + 1][y1 - 1],
+                       "lower_left"  => board[x1 - 1][y1 - 1],
+                       "lower_right" => board[x1 - 1][y1 - 1] }  
+   end
+
+  def opposing_checker_adjacent(coords)
+    opposing_checkers = adjacent_positions(coords)
+
+    if  ((opposing_checkers["upper_left"] != nil) and (opposing_checkers["upper_left"].color != @current_player))
+      opposing_checkers["upper_left"] = true
+    end
+    
+    if  ((opposing_checkers["upper_right"] != nil) and (opposing_checkers["upper_right"].color != @current_player))
+      opposing_checkers["upper_right"] = true
+    end
+    
+    if  ((opposing_checkers["lower_left"] != nil) and (opposing_checkers["lower_left"].color != @current_player))
+      opposing_checkers["lower_left"] = true
+    end
+    
+    if  ((opposing_checkers["lower_right"] != nil) and (opposing_checkers["lower_right"].color != @current_player))
+      opposing_checkers["lower_right"] = true
+    end
+   
+    opposing_checkers
+  end
+  
+  def jump_available_and_not_taken?(coords)
+    x1_orig = coords[0]
+    y1_orig = coords[1]
+    x2_orig = coords[2]
+    y2_orig = coords[3] 
+    
+    map = coords.dup
+    x1 = map[0]
+    y1 = map[1]
+    x2 = map[2]
+    y2 = map[3]
+    
+    
+
+    jumpable_checkers = opposing_checker_adjacent(coords)
+    
+    result = false    
+
+    if ((jumpable_checkers["upper_left"] == true) and (board[x1_orig + 2][y1_orig + 2].nil?) and (out_of_bounds?(coord_help(x1 += 2, y1 += 2, map)) == false) and ((x2_orig != x1_orig + 2) and (y2_orig != y1_orig + 2)))
+        
+        result = true
+    elsif ((jumpable_checkers["upper_right"] == true) and (board[x1_orig + 2][y1_orig - 2].nil?) and (out_of_bounds?(coord_help(x1 += 2, y1 -= 2, map)) == false) and ((x2_orig != x1_orig + 2) and (y2_orig != y1_orig - 2)))
+        
+        result = true
+    end
+    
+    if board[coords[0]][coords[1]].isKing?
+
+      if ((jumpable_checkers["lower_left"] == true) and (board[x1_orig - 2][y1_orig + 2].nil?) and (out_of_bounds? (coord_help(x1 -= 2, y1 += 2, map)) == false) and ((x2_orig != x1_orig - 2) and (y2_orig != y1_orig + 2)))
+        
+        result = true
+      elsif ((jumpable_checkers["lower_right"] == true) and (board[x1_orig - 2][y1_orig -2].nil?) and (out_of_bounds? (coord_help(x1 -= 2, y1 -= 2, map))== false) and ((x2_orig != x1_orig - 2) and (y2_orig != y1_orig - 2)))
+        
+        result = true     
+      end
+    end
+
+    result
+  end          
+  
+  def coord_help(function1, function2, array)
+    function1
+    function2
+    array
+  end
+
   def attempted_jump_of_own_checker(coords)
     if jumping_move?(coords)
       x1 = coords[0]
@@ -122,7 +212,7 @@ class Game
     @board[remove_checker_x_value][remove_checker_y_value] = nil
   end
 
-  def out_of_bounds(coords)
+  def out_of_bounds?(coords)
     x = coords[2]
     y = coords[3]
 

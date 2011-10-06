@@ -96,6 +96,13 @@ describe Game do
       @game.move_validator(3, 3, 2, 2).should == nil
       @game.board[2][2].should equal(king_checker)
     end
+  end
+  
+  describe "jumping checkers" do
+
+    before(:each) do
+      @game = Game.new
+    end
 
     it "should allow jumps if there is an opposing checker in place and a vacant spot to land" do
       @game.create_test_board
@@ -135,7 +142,13 @@ describe Game do
     end
 
     it "should force the player to jump if a jump is possible" do
-      pending
-    end 
+      @game.create_test_board
+      jumping_checker = Checker.new(3, 3, :red)
+      potential_jumped_checker = Checker.new(4, 4, :black)
+      @game.place_checker_on_board(jumping_checker)
+      @game.place_checker_on_board(potential_jumped_checker)
+      @game.move_validator(3, 3, 4, 2).should == "You must jump if a jump is available"
+      @game.board[4][2].should_not equal(jumping_checker)
+    end
   end
 end
