@@ -5,7 +5,32 @@ class Game
   def initialize
     @gui = BasicGui.new
     @current_player = :red
-    create_board
+    @board = create_board
+    play_game
+  end
+
+  def play_game
+    puts intro
+
+    #while(won? == false)
+    @gui.render_board(@board)
+    print move_request
+    move_coordinates = gets 
+    coord_array = move_coordinates.chomp.split(',')
+    x1 = coord_array[0].to_i
+    y1 = coord_array[1].to_i
+    x2 = coord_array[2].to_i
+    y2 = coord_array[3].to_i
+    puts move_validator(x1, y1, x2, y2)
+    @gui.render_board(@board)
+  end
+
+  def intro
+    'Welcome to Checkers!'
+  end
+  
+  def move_request
+    "#{@current_player.upcase} make move(x1, y1, x2, y2): "
   end
 
   def create_board

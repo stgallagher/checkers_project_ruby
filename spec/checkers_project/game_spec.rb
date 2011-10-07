@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Game do
-  
+
   describe "creating a board with checkers" do
     before(:each) do
       @game = Game.new
@@ -29,6 +29,24 @@ describe Game do
       @game.board[5][7].color.should == :black
       @game.board[6][4].color.should == :black
       @game.board[7][3].color.should == :black
+    end
+  end
+
+  describe "playing game" do  
+    before(:each) do
+      @game = Game.new
+    end
+    
+    it "starts with a welcome message" do
+      @game.intro.should == "Welcome to Checkers!"
+    end
+    
+    it "requests a move from the current player" do
+      @game.move_request.should == "RED make move(x1, y1, x2, y2): "
+    end
+
+    it "should ask how many players are playing and store the value" do
+      pending
     end
   end
 
