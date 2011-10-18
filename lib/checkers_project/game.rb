@@ -1,7 +1,9 @@
+
+
 class Game
   
-  attr_accessor :board, :gui
-
+  attr_accessor :board, :gui, :current_player
+  
   def initialize
     @gui = BasicGui.new
     @current_player = :red
@@ -12,17 +14,35 @@ class Game
   def play_game
     puts intro
 
-    #while(won? == false)
-    @gui.render_board(@board)
-    print move_request
-    move_coordinates = gets 
-    coord_array = move_coordinates.chomp.split(',')
-    x1 = coord_array[0].to_i
-    y1 = coord_array[1].to_i
-    x2 = coord_array[2].to_i
-    y2 = coord_array[3].to_i
-    puts move_validator(x1, y1, x2, y2)
-    @gui.render_board(@board)
+    while(won? == false)
+      message = nil
+      @gui.render_board(@board)
+      print move_request
+      move_coordinates = gets 
+      coord_array = move_coordinates.chomp.split(',')
+      x1 = coord_array[0].to_i
+      y1 = coord_array[1].to_i
+      x2 = coord_array[2].to_i
+      y2 = coord_array[3].to_i
+      if @current_player == :black
+        x1 = 7 - x1
+        y1 = 7 - y1
+        x2 = 7 - x2
+        y2 = 7 - y2
+      end
+      puts message = move_validator(x1, y1, x2, y2)
+      if(message == nil)
+        @current_player = switch_player
+      end
+    end  
+  end
+  
+  def won?
+    false
+  end
+
+  def switch_player
+    @current_player == :red ? :black : :red
   end
 
   def intro
@@ -82,6 +102,8 @@ class Game
   def move_validator(x_origin, y_origin, x_dest, y_dest)
     coords = [x_origin, y_origin, x_dest, y_dest]
     
+    message = nil
+
     case 
     when out_of_bounds?(coords) == true
       message = "You cannot move off the board"
@@ -105,6 +127,12 @@ class Game
       message = "You must jump if a jump is available"  
     
     else
+      if @current_player == :black
+        coords[0] = 7 - coords[0]
+        coords[1] = 7 - coords[1]
+        coords[2] = 7 - coords[2]
+        coords[3] = 7 - coords[3]
+      end
       move(coords[0], coords[1], coords[2], coords[3])
       if jumping_move?(coords)
         remove_jumped_checker(coords)
@@ -118,7 +146,14 @@ class Game
     y1 = coords[1]
     x2 = coords[2]
     y2 = coords[3]
-
+    
+    if @current_player == :black
+        x1 = 7 - coords[0]
+        y1 = 7 - coords[1]
+        x2 = 7 - coords[2]
+        y2 = 7 - coords[3]
+    end
+    
     jump_positions = { "upper_left"  => board[x1 + 1][y1 + 1],
                        "upper_right" => board[x1 + 1][y1 - 1],
                        "lower_left"  => board[x1 - 1][y1 - 1],
@@ -153,13 +188,26 @@ class Game
     x2_orig = coords[2]
     y2_orig = coords[3] 
     
+    if @current_player == :black
+      x1_orig = 7 - coords[0]
+      y1_orig = 7 - coords[1]
+      x2_orig = 7 - coords[2]
+      y2_orig = 7 - coords[3]
+    end
+
     map = coords.dup
+    
     x1 = map[0]
     y1 = map[1]
     x2 = map[2]
     y2 = map[3]
     
-    
+    if @current_player == :black
+      x1 = map[0]
+      y1 = map[1]
+      x2 = map[2]
+      y2 = map[3]
+    end
 
     jumpable_checkers = opposing_checker_adjacent(coords)
     
@@ -173,7 +221,7 @@ class Game
         result = true
     end
     
-    if board[coords[0]][coords[1]].isKing?
+    if (board[coords[0]][coords[1]].nil? == false and board[coords[0]][coords[1]].isKing?)
 
       if ((jumpable_checkers["lower_left"] == true) and (board[x1_orig - 2][y1_orig + 2].nil?) and (out_of_bounds? (coord_help(x1 -= 2, y1 += 2, map)) == false) and ((x2_orig != x1_orig - 2) and (y2_orig != y1_orig + 2)))
         
@@ -199,7 +247,14 @@ class Game
       y1 = coords[1]
       x2 = coords[2]
       y2 = coords[3]
-    
+      
+      if @current_player == :black
+        x1 = 7 - coords[0]
+        y1 = 7 - coords[1]
+        x2 = 7 - coords[2]
+        y2 = 7 - coords[3]
+      end
+
       x_delta = (x2 > x1) ? 1 : -1
       y_delta = (y2 > y1) ? 1 : -1
     
@@ -218,7 +273,7 @@ class Game
     y1 = coords[1]
     x2 = coords[2]
     y2 = coords[3]
-
+    
     (x2 - x1).abs > 1 
   end
   
@@ -248,6 +303,10 @@ class Game
     x = coords[0]
     y = coords[1]
     
+    if @current_player == :black
+      x = 7 - x 
+      y = 7 - y
+    end
     @board[x][y].nil?
   end
 
@@ -263,7 +322,10 @@ class Game
   def attempted_move_to_occupied_square(coords)
     x = coords[2]
     y = coords[3]
-
+    if @current_player == :black
+      x = 7 - x 
+      y = 7 - y
+    end
     not board[x][y].nil?
   end
   
