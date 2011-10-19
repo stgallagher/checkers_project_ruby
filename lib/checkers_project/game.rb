@@ -336,12 +336,14 @@ class Game
     
     jump_possiblities = generate_jump_locations_coordinates_list
     
-    can_jump? = false
-    jump_possiblities.each_slice do |i|
+    not_taken_jump = true
+    jump_possiblities.each_slice(2) do |i|
       if(i[0] == x_dest) and (i[1] == y_dest)
-        can_jump 
-      
-
+        not_taken_jump = false
+      end
+    end
+    
+    not_taken_jump   
   end          
 
   def attempted_jump_of_own_checker(coords)
