@@ -48,7 +48,7 @@ class Game
   end
   
   def move_request
-    "#{@current_player.upcase} make move(x1, y1, x2, y2): "
+    "#{@current_player.to_s.upcase} make move(x1, y1, x2, y2): "
   end
 
   def create_board
