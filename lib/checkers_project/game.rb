@@ -11,13 +11,13 @@ class Game
     @current_player = :red
     @board = create_board
     
-    #play_game
+    play_game
   end
 
   def play_game
     puts intro
 
-    while(won? == false)
+    while(game_over? == false)
       message = nil
       @gui.render_board(@board)
       print move_request
@@ -27,12 +27,7 @@ class Game
       y1 = coord_array[1].to_i
       x2 = coord_array[2].to_i
       y2 = coord_array[3].to_i
-      if @current_player == :black
-        x1 = 7 - x1
-        y1 = 7 - y1
-        x2 = 7 - x2
-        y2 = 7 - y2
-      end
+      
       puts message = move_validator(x1, y1, x2, y2)
       if(message == nil)
         @current_player = switch_player
@@ -40,8 +35,8 @@ class Game
     end  
   end
   
-  def won?
-    false
+  def game_over?
+    (@red_checkers.count == 0) or (@black_checkers.count == 0)
   end
 
   def switch_player
@@ -139,8 +134,8 @@ class Game
     when attempted_jump_of_own_checker(coords)
       message = "You cannot jump a checker of your own color"
     
-    #when jump_available_and_not_taken?(coords) == true
-    #  message = "You must jump if a jump is available"  
+    when jump_available_and_not_taken?(coords) == true
+      message = "You must jump if a jump is available"  
     
     else
       move(coords[0], coords[1], coords[2], coords[3])
@@ -156,17 +151,27 @@ class Game
     x1 = coords[0]
     y1 = coords[1]
     
-    jump_positions = { "upper_left"  => board[x1 + 1][y1 + 1],
-                       "upper_right" => board[x1 + 1][y1 - 1],
-                       "lower_left"  => board[x1 - 1][y1 + 1],
-                       "lower_right" => board[x1 - 1][y1 - 1] }  
-    
+    if @current_player == :red
+
+      jump_positions = { "upper_left"  => board[x1 + 1][y1 + 1],
+                         "upper_right" => board[x1 + 1][y1 - 1],
+                         "lower_left"  => board[x1 - 1][y1 + 1],
+                         "lower_right" => board[x1 - 1][y1 - 1] }  
+    end
+
     if @current_player == :black
+      if x1 < 7
+        jump_positions = { "upper_left"  => board[x1 - 1][y1 - 1],
+                           "upper_right" => board[x1 - 1][y1 + 1], 
+                           "lower_left"  => board[x1 + 1][y1 - 1],
+                           "lower_right" => board[x1 + 1][y1 + 1] }
+      else
       jump_positions = { "upper_left"  => board[x1 - 1][y1 - 1],
-                         "upper_right" => board[x1 - 1][y1 + 1],
-                         "lower_left"  => board[x1 + 1][y1 - 1],
-                         "lower_right" => board[x1 + 1][y1 + 1] }
-    end  
+                         "upper_right" => board[x1 - 1][y1 + 1], 
+                         "lower_left"  => nil,
+                         "lower_right" => nil }
+      end  
+    end
     jump_positions
   end
 
@@ -329,7 +334,13 @@ class Game
     end
     coordinates_list.flatten
   end
-
+  
+  def jump_available?
+    possible_jumps = generate_jump_locations_coordinates_list
+    
+    possible_jumps.size > 0
+  end
+  
   def jump_available_and_not_taken?(coords)
     x_dest = coords[2]
     y_dest = coords[3]
@@ -343,7 +354,7 @@ class Game
       end
     end
     
-    not_taken_jump   
+    (jump_available? == true) and (not_taken_jump)   
   end          
 
   def attempted_jump_of_own_checker(coords)

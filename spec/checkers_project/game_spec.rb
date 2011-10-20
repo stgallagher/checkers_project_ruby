@@ -61,7 +61,9 @@ describe Game do
     end
 
     it "should end the game when all the checkers of one color are removed" do
-      pending
+      @game.game_over?.should == false
+      @game.red_checkers.clear
+      @game.game_over?.should == true 
     end
   end
 
@@ -90,12 +92,19 @@ describe Game do
       @game.board[1][7].should equal(not_moving_checker)
     end
 
-    it "should error if requested moving checker is not at location specified" do
+    it "should error if requested moving checker is not at location specified (for red)" do
+      @game.current_player = :red
       @game.move_validator(3, 1, 4, 2).should == "There is no checker to move in requested location"
       @game.board[3][1].should == nil
       @game.board[4][2].should == nil
     end
-
+    
+    it "should error if requested moving checker is not at location specified (for black)" do
+      @game.current_player = :black
+      @game.move_validator(4, 6, 3, 7).should == "There is no checker to move in requested location"
+      @game.move_validator(5, 5, 4, 4).should == nil
+    end
+    
     it "should not allow non-diagonal moves" do
       not_moving_checker = @game.board[2][4]
       @game.move_validator(2, 4, 3, 4).should == "You can only move a checker diagonally"
@@ -357,6 +366,26 @@ describe Game do
       @game.generate_jump_locations_coordinates_list.should == [ 2, 4, 2, 2]
     end
     
+    it "should tell when a jump is available (for red)" do
+      @game.current_player = :red
+      red_checker = Checker.new(3, 3, :red)
+      black_checker = Checker.new(4, 4, :black)
+      @game.place_checker_on_board(red_checker)
+      @game.jump_available?.should == false
+      @game.place_checker_on_board(black_checker)
+      @game.jump_available?.should == true
+    end
+    
+    it "should tell when a jump is available (for black)" do
+      @game.current_player = :black
+      red_checker = Checker.new(3, 3, :red)
+      black_checker = Checker.new(4, 4, :black)
+      @game.place_checker_on_board(black_checker)
+      @game.jump_available?.should == false
+      @game.place_checker_on_board(red_checker)
+      @game.jump_available?.should == true
+    end
+
     it "should tell when a jump is available but it has not been taken (for red)" do
       @game.current_player = :red
       red_checker1 = Checker.new(1, 1, :red)
@@ -430,7 +459,6 @@ describe Game do
     end
 
     it "should force the player to jump if a jump is possible" do
-      pending
       jumping_checker = Checker.new(3, 3, :red)
       potential_jumped_checker = Checker.new(4, 4, :black)
       @game.place_checker_on_board(jumping_checker)
