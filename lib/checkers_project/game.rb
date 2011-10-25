@@ -11,7 +11,7 @@ class Game
     @current_player = :red
     @board = create_board
     
-    #play_game
+    play_game
   end
 
   def play_game
