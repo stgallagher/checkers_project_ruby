@@ -51,6 +51,12 @@ describe Game do
       @game.move_request.should == "RED make move(x1, y1, x2, y2): "
     end
     
+    it "translates a move request string into an array of coordinates" do
+      player_input = "3, 3, 5, 5"
+      translated_array = @game.translate_move_request_to_coordinates(player_input)
+      translated_array.should == [3, 3, 5, 5]
+    end    
+
     it "should switch player as necessary" do
       @game.current_player = :red
       @game.switch_player.should == :black
@@ -75,40 +81,48 @@ describe Game do
 
     it "move method should move a checker from one location to another" do
       moving_checker = @game.board[2][2]
-      @game.move(2, 2, 3, 1)
+      @game.configure_coordinates([2, 2, 3, 1])
+      @game.move
       @game.board[3][1].should equal(moving_checker)
       @game.board[2][2].should == nil
     end
 
     it "should not allow a move that is off the board (to the right)" do
       not_moving_checker = @game.board[2][0]
-      @game.move_validator(2, 0, 3, -1).should == "You cannot move off the board"
+      @game.configure_coordinates([2, 0, 3, -1])
+      @game.move_validator.should == "You cannot move off the board"
       @game.board[2][0].should equal(not_moving_checker)
     end
     
     it "should not allow a move that is off the board (to the left)" do
       not_moving_checker = @game.board[1][7]
-      @game.move_validator(1, 7, 2, 8).should == "You cannot move off the board"
+      @game.configure_coordinates([1, 7, 2, 8])
+      @game.move_validator.should == "You cannot move off the board"
       @game.board[1][7].should equal(not_moving_checker)
     end
 
     it "should error if requested moving checker is not at location specified (for red)" do
       @game.current_player = :red
-      @game.move_validator(3, 1, 4, 2).should == "There is no checker to move in requested location"
+      @game.configure_coordinates([3, 1, 4, 2])
+      @game.move_validator.should == "There is no checker to move in requested location"
       @game.board[3][1].should == nil
       @game.board[4][2].should == nil
     end
     
     it "should error if requested moving checker is not at location specified (for black)" do
       @game.current_player = :black
-      @game.move_validator(4, 6, 3, 7).should == "There is no checker to move in requested location"
-      @game.move_validator(5, 5, 4, 4).should == nil
+      @game.configure_coordinates([4, 6, 3, 7])
+      @game.move_validator.should == "There is no checker to move in requested location"
+      @game.configure_coordinates([5, 5, 4, 4])
+      @game.move_validator.should == nil
     end
     
     it "should not allow non-diagonal moves" do
       not_moving_checker = @game.board[2][4]
-      @game.move_validator(2, 4, 3, 4).should == "You can only move a checker diagonally"
-      @game.move_validator(2, 4, 2, 5).should == "You can only move a checker diagonally"
+      @game.configure_coordinates([2, 4, 3, 4])
+      @game.move_validator.should == "You can only move a checker diagonally"
+      @game.configure_coordinates([2, 4, 2, 5])
+      @game.move_validator.should == "You can only move a checker diagonally"
       @game.board[2][4].should equal(not_moving_checker)
       @game.board[3][4].should == nil
       @game.board[2][5].should == nil
@@ -117,14 +131,18 @@ describe Game do
     it "should not allow moves to occupied squares" do
       moving_checker = @game.board[1][1]
       stationary_checker = @game.board[2][2]
-      @game.move_validator(1, 1, 2, 2).should == "You cannot move to an occupied square"
+      @game.configure_coordinates([1, 1, 2, 2])
+      @game.move_validator.should == "You cannot move to an occupied square"
       @game.board[1][1].should equal(moving_checker)
       @game.board[2][2].should equal(stationary_checker)
     end
 
     it "should not allow backwards moves if checker is not a king" do
-      @game.move(2, 2, 3, 3)
-      @game.move_validator(3, 3, 2, 2).should == "A non-king checker cannot move backwards" 
+      @game.create_test_board
+      non_king_checker = Checker.new(3, 3, :red)
+      @game.place_checker_on_board(non_king_checker)
+      @game.configure_coordinates([3, 3, 2, 2])
+      @game.move_validator.should == "A non-king checker cannot move backwards" 
     end
 
     it "should allow backwards moves (if otherwise valid) if checker is a king" do
@@ -132,7 +150,8 @@ describe Game do
       king_checker = Checker.new(3, 3, :red)
       king_checker.make_king
       @game.place_checker_on_board(king_checker)
-      @game.move_validator(3, 3, 2, 2).should == nil
+      @game.configure_coordinates([3, 3, 2, 2])
+      @game.move_validator.should == nil
       @game.board[2][2].should equal(king_checker)
     end
   end
@@ -151,7 +170,8 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      adjacent_positions = @game.adjacent_positions([4, 4, nil, nil])
+      @game.configure_coordinates([4, 4, nil, nil])
+      adjacent_positions = @game.adjacent_positions
       adjacent_positions["upper_left"].class.should  == Checker
       adjacent_positions["upper_right"].should       == nil
       adjacent_positions["lower_left"].should        == nil
@@ -166,7 +186,8 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      adjacent_positions = @game.adjacent_positions([4, 4, nil, nil])
+      @game.configure_coordinates([4, 4, nil, nil])
+      adjacent_positions = @game.adjacent_positions
       adjacent_positions["upper_left"].class.should  == Checker
       adjacent_positions["upper_right"].should       == nil
       adjacent_positions["lower_left"].should        == nil
@@ -180,7 +201,8 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      opposing_checkers = @game.opposing_checker_adjacent([4, 4, nil, nil])
+      @game.configure_coordinates([4, 4, nil, nil]) 
+      opposing_checkers = @game.opposing_checker_adjacent
       opposing_checkers["upper_left"].should  == true 
       opposing_checkers["upper_right"].should == nil
       opposing_checkers["lower_left"].should  == nil
@@ -195,7 +217,8 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      opposing_checkers = @game.opposing_checker_adjacent([4, 4, nil, nil])
+      @game.configure_coordinates([4, 4, nil, nil])
+      opposing_checkers = @game.opposing_checker_adjacent
       opposing_checkers["upper_left"].should  == true 
       opposing_checkers["upper_right"].should == nil
       opposing_checkers["lower_left"].should  == nil
@@ -212,7 +235,8 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      available_jumps = @game.jump_locations([4, 4, nil,nil])
+      @game.configure_coordinates([4, 4, nil, nil])
+      available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
       available_jumps["lower_left"].should == false
@@ -229,7 +253,8 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      available_jumps = @game.jump_locations([4, 4, nil,nil])
+      @game.configure_coordinates([4, 4, nil, nil])
+      available_jumps = @game.jump_locations
       available_jumps["upper_left"].should  == true
       available_jumps["upper_right"].should == false
       available_jumps["lower_left"].should  == false
@@ -244,14 +269,15 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      available_jumps = @game.jump_locations([4, 4, nil,nil])
+      @game.configure_coordinates([4, 4, nil, nil])
+      available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
       available_jumps["lower_left"].should == false
       available_jumps["lower_right"].should == false
       
       reference_checker.make_king
-      available_jumps = @game.jump_locations([4, 4, nil,nil])
+      available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
       available_jumps["lower_left"].should == false
@@ -266,14 +292,15 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      available_jumps = @game.jump_locations([4, 4, nil,nil])
+      @game.configure_coordinates([4, 4, nil, nil])
+      available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
       available_jumps["lower_left"].should == false
       available_jumps["lower_right"].should == false
       
       reference_checker.make_king
-      available_jumps = @game.jump_locations([4, 4, nil,nil])
+      available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
       available_jumps["lower_left"].should == false
@@ -288,7 +315,8 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
-      @game.jump_locations_coordinates([4, 4, nil, nil]).should == ([[6, 6], [6, 2]])
+      @game.configure_coordinates([4, 4, nil, nil])
+      @game.jump_locations_coordinates.should == ([[6, 6], [6, 2]])
     end 
     
     it "jump locations should not include jumps that are blocked (for red)" do
@@ -301,7 +329,8 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      @game.jump_locations_coordinates([4, 4, nil,nil]).should == ([[6, 6]])
+      @game.configure_coordinates([4, 4, nil, nil])
+      @game.jump_locations_coordinates.should == ([[6, 6]])
     end
     
     it "should produce a set of location coordinates for potential jump locations (for black)" do
@@ -312,7 +341,8 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
-      @game.jump_locations_coordinates([4, 4, nil, nil]).should == ([[2, 2], [2, 6]])
+      @game.configure_coordinates([4, 4, nil, nil])
+      @game.jump_locations_coordinates.should == ([[2, 2], [2, 6]])
     end 
     
     it "jump locations should not include jumps that are blocked (for black)" do
@@ -325,7 +355,8 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      @game.jump_locations_coordinates([4, 4, nil,nil]).should == ([[2, 2]])
+      @game.configure_coordinates([4, 4, nil, nil])
+      @game.jump_locations_coordinates.should == ([[2, 2]])
     end
     
     it "should survey all the checkers to see and build a list of possible jumps (for red)" do
@@ -393,9 +424,11 @@ describe Game do
       black_checker1 = Checker.new(2, 6, :black)
       @game.place_checker_on_board(red_checker1)
       @game.place_checker_on_board(red_checker2)
-      @game.place_checker_on_board(black_checker1) 
-      @game.jump_available_and_not_taken?([1, 1, 2, 2]).should == true
-      @game.jump_available_and_not_taken?([1, 7, 3, 5]).should == false
+      @game.place_checker_on_board(black_checker1)
+      @game.configure_coordinates([1, 1, 2, 2]) 
+      @game.jump_available_and_not_taken?.should == true
+      @game.configure_coordinates([1, 7, 3, 5])
+      @game.jump_available_and_not_taken?.should == false
     end
     
     it "should remove a checker from the board and decrement opposing checker collection if that checker is jumped (for red)" do
@@ -405,7 +438,8 @@ describe Game do
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
       @game.black_checkers.count.should == 13
-      @game.move_validator(3, 3, 5, 5).should == nil
+      @game.configure_coordinates([3, 3, 5, 5])
+      @game.move_validator.should == nil
       @game.board[5][5].should equal(jumping_checker)
       @game.board[4][4].should == nil
       @game.black_checkers.count.should == 12
@@ -418,7 +452,8 @@ describe Game do
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
       @game.red_checkers.count.should == 13
-      @game.move_validator(5, 5, 3, 3).should == nil
+      @game.configure_coordinates([5, 5, 3, 3])
+      @game.move_validator.should == nil
       @game.board[3][3].should equal(jumping_checker)
       @game.board[4][4].should == nil
       @game.red_checkers.count.should == 12
@@ -429,7 +464,8 @@ describe Game do
       jumped_checker = Checker.new(4, 4, :black)
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
-      @game.move_validator(3, 3, 5, 5).should == nil
+      @game.configure_coordinates([3, 3, 5, 5])
+      @game.move_validator.should == nil
       @game.board[5][5].should equal(jumping_checker)
       @game.board[4][4].should == nil
     end
@@ -439,7 +475,8 @@ describe Game do
       jumped_checker = Checker.new(4, 4, :red)
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
-      @game.move_validator(3, 3, 5, 5).should == "You cannot jump a checker of your own color"
+      @game.configure_coordinates([3, 3, 5, 5])
+      @game.move_validator.should == "You cannot jump a checker of your own color"
       @game.board[5][5].should == nil
       @game.board[4][4].should equal(jumped_checker)
       @game.board[3][3].should equal(jumping_checker)
@@ -452,7 +489,8 @@ describe Game do
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
       @game.place_checker_on_board(blocking_checker)
-      @game.move_validator(3, 3, 5, 5).should == "You cannot move to an occupied square"
+      @game.configure_coordinates([3, 3, 5, 5])
+      @game.move_validator.should == "You cannot move to an occupied square"
       @game.board[5][5].should equal(blocking_checker) 
       @game.board[4][4].should equal(jumped_checker)
       @game.board[3][3].should equal(jumping_checker)
@@ -463,7 +501,8 @@ describe Game do
       potential_jumped_checker = Checker.new(4, 4, :black)
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(potential_jumped_checker)
-      @game.move_validator(3, 3, 4, 2).should == "You must jump if a jump is available"
+      @game.configure_coordinates([3, 3, 4, 2])
+      @game.move_validator.should == "You must jump if a jump is available"
       @game.board[4][2].should_not equal(jumping_checker)
     end
   end
