@@ -162,7 +162,13 @@ describe Game do
       @game = Game.new
       @game.board = @game.create_test_board
     end
-    
+   
+    it "shoud have a test helper method that sets x and y test values for test" do
+     @game.set_scan_values(3, 5)
+     @game.x_scan.should == 3
+     @game.y_scan.should == 5
+    end
+
     it "should scan adjacent positions and tell what they contain (for red)" do
       reference_checker = Checker.new(4, 4, :red)
       upper_left_checker = Checker.new(5, 5, :black)
@@ -170,7 +176,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       adjacent_positions = @game.adjacent_positions
       adjacent_positions["upper_left"].class.should  == Checker
       adjacent_positions["upper_right"].should       == nil
@@ -186,7 +192,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       adjacent_positions = @game.adjacent_positions
       adjacent_positions["upper_left"].class.should  == Checker
       adjacent_positions["upper_right"].should       == nil
@@ -201,7 +207,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil]) 
+      @game.set_scan_values(4, 4)
       opposing_checkers = @game.opposing_checker_adjacent
       opposing_checkers["upper_left"].should  == true 
       opposing_checkers["upper_right"].should == nil
@@ -217,7 +223,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       opposing_checkers = @game.opposing_checker_adjacent
       opposing_checkers["upper_left"].should  == true 
       opposing_checkers["upper_right"].should == nil
@@ -235,7 +241,7 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
@@ -253,7 +259,7 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       available_jumps = @game.jump_locations
       available_jumps["upper_left"].should  == true
       available_jumps["upper_right"].should == false
@@ -269,7 +275,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
@@ -292,7 +298,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(lower_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
@@ -300,6 +306,7 @@ describe Game do
       available_jumps["lower_right"].should == false
       
       reference_checker.make_king
+      @game.set_scan_values(4, 4)
       available_jumps = @game.jump_locations
       available_jumps["upper_left"].should == true
       available_jumps["upper_right"].should == false
@@ -315,7 +322,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       @game.jump_locations_coordinates.should == ([[6, 6], [6, 2]])
     end 
     
@@ -329,7 +336,7 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       @game.jump_locations_coordinates.should == ([[6, 6]])
     end
     
@@ -341,7 +348,7 @@ describe Game do
       @game.place_checker_on_board(reference_checker)
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       @game.jump_locations_coordinates.should == ([[2, 2], [2, 6]])
     end 
     
@@ -355,7 +362,7 @@ describe Game do
       @game.place_checker_on_board(upper_left_checker)
       @game.place_checker_on_board(upper_right_checker)
       @game.place_checker_on_board(blocking_upper_right_jump_checker)
-      @game.configure_coordinates([4, 4, nil, nil])
+      @game.set_scan_values(4, 4)
       @game.jump_locations_coordinates.should == ([[2, 2]])
     end
     

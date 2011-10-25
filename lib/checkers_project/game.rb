@@ -2,8 +2,8 @@
 
 class Game
   
-  attr_accessor :board, :gui, :red_checkers, :black_checkers, :current_player , :x_orig, :y_orig, :x_dest, :y_dest 
-  
+  attr_accessor :board, :gui, :red_checkers, :black_checkers, :current_player , :x_orig, :y_orig, :x_dest, :y_dest, :x_scan, :y_scan 
+                
   def initialize
     @red_checkers   = Array.new
     @black_checkers = Array.new
@@ -21,11 +21,12 @@ class Game
       message = nil
       @gui.render_board(@board)
       print move_request
-      move_coordinates = gets 
+      player_input = gets 
       coordinates = translate_move_request_to_coordinates(player_input) 
       configure_coordinates(coordinates)
 
-      puts message = move_validator
+      message = move_validator
+      puts message unless message.nil?
       if(message == nil)
         @current_player = switch_player
       end
@@ -121,30 +122,33 @@ class Game
   def move_validator
 
     message = nil
+    
 
     case 
     when out_of_bounds?(@x_dest, @y_dest) == true
       message = "You cannot move off the board"
-    
+      
     when no_checker_at_origin? == true
       message = "There is no checker to move in requested location"
-    
+      
     when attempted_non_diagonal_move == true
       message = "You can only move a checker diagonally"
-    
+      
     when attempted_move_to_occupied_square == true
       message = "You cannot move to an occupied square"
-    
+      
     when non_king_moving_backwards == true
       message = "A non-king checker cannot move backwards"
-    
+      
     when attempted_jump_of_own_checker
       message = "You cannot jump a checker of your own color"
-    
+      
     when jump_available_and_not_taken? == true
       message = "You must jump if a jump is available"  
+      
     
     else
+      
       move
       
       if jumping_move?
@@ -158,25 +162,26 @@ class Game
     
     if @current_player == :red
 
-      jump_positions = { "upper_left"  => board[@x_orig + 1][@y_orig + 1],
-                         "upper_right" => board[@x_orig + 1][@y_orig - 1],
-                         "lower_left"  => board[@x_orig - 1][@y_orig + 1],
-                         "lower_right" => board[@x_orig - 1][@y_orig - 1] }  
+      jump_positions = { "upper_left"  => board[@x_scan + 1][@y_scan + 1],
+                         "upper_right" => board[@x_scan + 1][@y_scan - 1],
+                         "lower_left"  => board[@x_scan - 1][@y_scan + 1],
+                         "lower_right" => board[@x_scan - 1][@y_scan - 1] }  
     end
 
     if @current_player == :black
-      if @x_orig < 7
-        jump_positions = { "upper_left"  => board[@x_orig - 1][@y_orig - 1],
-                           "upper_right" => board[@x_orig - 1][@y_orig + 1], 
-                           "lower_left"  => board[@x_orig + 1][@y_orig - 1],
-                           "lower_right" => board[@x_orig + 1][@y_orig + 1] }
+      if @x_scan < 7
+        jump_positions = { "upper_left"  => board[@x_scan - 1][@y_scan - 1],
+                           "upper_right" => board[@x_scan - 1][@y_scan + 1], 
+                           "lower_left"  => board[@x_scan + 1][@y_scan - 1],
+                           "lower_right" => board[@x_scan + 1][@y_scan + 1] }
       else
-      jump_positions = { "upper_left"  => board[@x_orig - 1][@y_orig - 1],
-                         "upper_right" => board[@x_orig - 1][@y_orig + 1], 
+      jump_positions = { "upper_left"  => board[@x_scan - 1][@y_scan - 1],
+                         "upper_right" => board[@x_scan - 1][@y_scan + 1], 
                          "lower_left"  => nil,
                          "lower_right" => nil }
       end  
     end
+    
     jump_positions
   end
 
@@ -210,18 +215,18 @@ class Game
                        "lower_left"  => false,
                        "lower_right" => false } 
     
-    checker = @board[@x_orig][@y_orig]
+    checker = @board[@x_scan][@y_scan]
     
     if(opposing_checkers["upper_left"] == true) and 
-      (out_of_bounds?(@x_orig + 2, @y_orig + 2) == false) and
-      (board[@x_orig + 2][@y_orig + 2] == nil)
+      (out_of_bounds?(@x_scan + 2, @y_scan + 2) == false) and
+      (board[@x_scan + 2][@y_scan + 2] == nil)
 
       jump_locations["upper_left"] = true
     end
     
     if(opposing_checkers["upper_right"] == true) and 
-      (out_of_bounds?(@x_orig + 2, @y_orig - 2) == false) and
-      (board[@x_orig + 2][@y_orig - 2] == nil)
+      (out_of_bounds?(@x_scan + 2, @y_scan - 2) == false) and
+      (board[@x_scan + 2][@y_scan - 2] == nil)
 
       jump_locations["upper_right"] = true
     end
@@ -229,15 +234,15 @@ class Game
     if(checker.isKing? == true)
       
       if(opposing_checkers["lower_left"] == true) and 
-        (out_of_bounds?(@x_orig - 2, @y_orig + 2) == false) and
-        (board[@x_orig - 2][@y_orig + 2] == nil)
+        (out_of_bounds?(@x_scan - 2, @y_scan + 2) == false) and
+        (board[@x_scan - 2][@y_scan + 2] == nil)
 
         jump_locations["lower_left"] = true
       end
 
       if(opposing_checkers["lower_right"] == true) and 
-        (out_of_bounds?(@x_orig - 2, @y_orig - 2) == false) and
-        (board[@x_orig - 2][@y_orig - 2] == nil)
+        (out_of_bounds?(@x_scan - 2, @y_scan - 2) == false) and
+        (board[@x_scan - 2][@y_scan - 2] == nil)
   
         jump_locations["lower_right"] = true
       end
@@ -251,15 +256,15 @@ class Game
                          "lower_right" => false }
 
       if(opposing_checkers["upper_left"] == true) and 
-        (out_of_bounds?(@x_orig - 2, @y_orig - 2) == false) and
-        (board[@x_orig - 2][@y_orig - 2] == nil)
+        (out_of_bounds?(@x_scan - 2, @y_scan - 2) == false) and
+        (board[@x_scan - 2][@y_scan - 2] == nil)
 
         jump_locations["upper_left"] = true
       end
     
       if(opposing_checkers["upper_right"] == true) and 
-        (out_of_bounds?(@x_orig - 2, @y_orig + 2) == false) and
-        (board[@x_orig - 2][@y_orig + 2] == nil)
+        (out_of_bounds?(@x_scan - 2, @y_scan + 2) == false) and
+        (board[@x_scan - 2][@y_scan + 2] == nil)
         
         jump_locations["upper_right"] = true
       end
@@ -267,20 +272,21 @@ class Game
       if(checker.isKing? == true)
           
         if(opposing_checkers["lower_left"] == true) and 
-          (out_of_bounds?(@x_orig + 2, @y_orig - 2) == false) and
-          (board[@x_orig + 2][@y_orig - 2] == nil)
+          (out_of_bounds?(@x_scan + 2, @y_scan - 2) == false) and
+          (board[@x_scan + 2][@y_scan - 2] == nil)
 
           jump_locations["lower_left"] = true
         end
 
         if(opposing_checkers["lower_right"] == true) and 
-          (out_of_bounds?(@x_orig + 2, @y_orig + 2) == false) and
-          (board[@x_orig + 2][@y_orig + 2] == nil)
+          (out_of_bounds?(@x_scan + 2, @y_scan + 2) == false) and
+          (board[@x_scan + 2][@y_scan + 2] == nil)
 
           jump_locations["lower_right"] = true
         end
       end
     end
+    
   jump_locations
   end
   
@@ -291,47 +297,50 @@ class Game
     
     if @current_player == :red
       if locations["upper_left"]  == true
-        jump_coords << [@x_orig + 2, @y_orig + 2]
+        jump_coords << [@x_scan + 2, @y_scan + 2]
       end
       if locations["upper_right"] == true
-        jump_coords << [@x_orig + 2, @y_orig - 2] 
+        jump_coords << [@x_scan + 2, @y_scan - 2] 
       end
       if locations["lower_left"]  == true
-        jump_coords << [@x_orig - 2, @y_orig + 2]
+        jump_coords << [@x_scan - 2, @y_scan + 2]
       end
       if locations["lower_right"] == true
-        jump_coords << [@x_orig - 2, @y_orig - 2]
+        jump_coords << [@x_scan - 2, @y_scan - 2]
       end
     end
 
     if @current_player == :black
       if locations["upper_left"]  == true
-        jump_coords << [@x_orig - 2, @y_orig - 2]
+        jump_coords << [@x_scan - 2, @y_scan - 2]
       end
       if locations["upper_right"] == true
-        jump_coords << [@x_orig - 2, @y_orig + 2] 
+        jump_coords << [@x_scan - 2, @y_scan + 2] 
       end
       if locations["lower_left"]  == true
-        jump_coords << [@x_orig + 2, @y_orig - 2]
+        jump_coords << [@x_scan + 2, @y_scan - 2]
       end
       if locations["lower_right"] == true
-        jump_coords << [@x_orig + 2, @y_orig + 2]
+        jump_coords << [@x_scan + 2, @y_scan + 2]
       end
     end
+    
     jump_coords
   end
   
   def generate_jump_locations_coordinates_list
     coordinates_list = []
+
     @board.each do |row|
       row.each do |loc|
         if (loc != nil) and (loc.color == @current_player)
-          @x_orig = loc.x_pos
-          @y_orig = loc.y_pos
+          @x_scan = loc.x_pos
+          @y_scan = loc.y_pos
           coordinates_list << jump_locations_coordinates
         end
       end
     end
+    
     coordinates_list.flatten
   end
   
@@ -422,7 +431,7 @@ class Game
   def move
     #moving
     moving_checker = @board[@x_orig][@y_orig]
-    
+
     # set new location for checker
     moving_checker.x_pos = @x_dest
     moving_checker.y_pos = @y_dest
@@ -430,5 +439,10 @@ class Game
     # update board positions of checker
     @board[@x_orig][@y_orig] = nil
     @board[@x_dest][@y_dest] = moving_checker
+  end
+
+  def set_scan_values(x, y)
+    @x_scan = x
+    @y_scan = y
   end
 end
