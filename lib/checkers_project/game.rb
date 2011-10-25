@@ -40,12 +40,7 @@ class Game
   end
 
   def translate_move_request_to_coordinates(move_request)
-    return_array = []
-    coords_array = move_request.chomp.split(',')
-    coords_array.each_with_index do |i, x|
-      return_array[x] = i.to_i
-    end
-    return_array
+    coords_array = move_request.chomp.split(',').map { |x| x.to_i }
   end
 
   def game_over?
