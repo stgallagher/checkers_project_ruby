@@ -11,7 +11,7 @@ class Game
     @current_player = :red
     @board = create_board
     
-    play_game
+    #play_game
   end
 
   def play_game
@@ -120,10 +120,8 @@ class Game
   end
 
   def move_validator
-
     message = nil
     
-
     case 
     when out_of_bounds?(@x_dest, @y_dest) == true
       message = "You cannot move off the board"
@@ -145,19 +143,29 @@ class Game
       
     when jump_available_and_not_taken? == true
       message = "You must jump if a jump is available"  
-      
     
     else
-      
       move
-      
       if jumping_move?
         remove_jumped_checker
       end
+      king_checkers_if_necessary
     end
     message
   end
   
+  def king_checkers_if_necessary
+    @board.each do |row|
+      row.each do |loc|
+        if (loc != nil) and (loc.color == :red) and (loc.x_pos == 7)
+          loc.make_king
+        elsif (loc != nil) and (loc.color == :black) and (loc.x_pos == 0)
+          loc.make_king
+        end
+      end
+    end
+  end
+
   def adjacent_positions
     
     if @current_player == :red
