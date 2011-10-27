@@ -79,15 +79,26 @@ describe Game do
       @game = Game.new
     end
 
-    it "move method should move a checker from one location to another" do
+    it "move method should move a checker from one location to another (for red)" do
+      @game.current_player = :red
       moving_checker = @game.board[2][2]
       @game.configure_coordinates([2, 2, 3, 1])
       @game.move
       @game.board[3][1].should equal(moving_checker)
       @game.board[2][2].should == nil
     end
-
+    
+    it "move method should move a checker from one location to another (for red)" do
+      @game.current_player = :black
+      moving_checker = @game.board[2][2]
+      @game.configure_coordinates([2, 2, 3, 1])
+      @game.move
+      @game.board[3][1].should equal(moving_checker)
+      @game.board[2][2].should == nil
+    end
+    
     it "should not allow a move that is off the board (to the right)" do
+      @game.current_player = :red
       not_moving_checker = @game.board[2][0]
       @game.configure_coordinates([2, 0, 3, -1])
       @game.move_validator.should == "You cannot move off the board"
@@ -95,6 +106,7 @@ describe Game do
     end
     
     it "should not allow a move that is off the board (to the left)" do
+      @game.current_player = :red
       not_moving_checker = @game.board[1][7]
       @game.configure_coordinates([1, 7, 2, 8])
       @game.move_validator.should == "You cannot move off the board"
@@ -113,8 +125,18 @@ describe Game do
       @game.current_player = :black
       @game.configure_coordinates([4, 6, 3, 7])
       @game.move_validator.should == "There is no checker to move in requested location"
+    end
+    
+    it "should error if requested moving checker is not current player's color (for red)" do
+      @game.current_player = :red
       @game.configure_coordinates([5, 5, 4, 4])
-      @game.move_validator.should == nil
+      @game.move_validator.should == "You cannot move an opponents checker"
+    end
+    
+    it "should error if requested moving checker is not current player's color (for black)" do
+      @game.current_player = :black
+      @game.configure_coordinates([2, 0, 3, 1])
+      @game.move_validator.should == "You cannot move an opponents checker"
     end
     
     it "should not allow non-diagonal moves" do

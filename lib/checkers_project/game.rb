@@ -10,8 +10,6 @@ class Game
     @gui = BasicGui.new
     @current_player = :red
     @board = create_board
-    
-    play_game
   end
 
   def play_game
@@ -128,17 +126,20 @@ class Game
       
     when no_checker_at_origin? == true
       message = "There is no checker to move in requested location"
-      
-    when attempted_non_diagonal_move == true
+    
+    when trying_to_move_opponents_checker? == true 
+      message = "You cannot move an opponents checker"  
+
+    when attempted_non_diagonal_move? == true
       message = "You can only move a checker diagonally"
       
-    when attempted_move_to_occupied_square == true
+    when attempted_move_to_occupied_square? == true
       message = "You cannot move to an occupied square"
       
-    when non_king_moving_backwards == true
+    when non_king_moving_backwards? == true
       message = "A non-king checker cannot move backwards"
       
-    when attempted_jump_of_own_checker
+    when attempted_jump_of_own_checker? == true
       message = "You cannot jump a checker of your own color"
       
     when jump_available_and_not_taken? == true
@@ -183,10 +184,10 @@ class Game
                            "lower_left"  => board[@x_scan + 1][@y_scan - 1],
                            "lower_right" => board[@x_scan + 1][@y_scan + 1] }
       else
-      jump_positions = { "upper_left"  => board[@x_scan - 1][@y_scan - 1],
-                         "upper_right" => board[@x_scan - 1][@y_scan + 1], 
-                         "lower_left"  => nil,
-                         "lower_right" => nil }
+        jump_positions = { "upper_left"  => board[@x_scan - 1][@y_scan - 1],
+                           "upper_right" => board[@x_scan - 1][@y_scan + 1], 
+                           "lower_left"  => nil,
+                           "lower_right" => nil }
       end  
     end
     
@@ -371,7 +372,7 @@ class Game
     (jump_available? == true) and (not_taken_jump)   
   end          
 
-  def attempted_jump_of_own_checker
+  def attempted_jump_of_own_checker?
     if jumping_move?
       x_delta = (@x_dest > @x_orig) ? 1 : -1
       y_delta = (@y_dest > @y_orig) ? 1 : -1
@@ -420,15 +421,19 @@ class Game
     @board[@x_orig][@y_orig].nil?
   end
 
-  def attempted_non_diagonal_move
+  def trying_to_move_opponents_checker?
+    @current_player != board[@x_orig][@y_orig].color
+  end
+
+  def attempted_non_diagonal_move?
     (@x_orig == @x_dest) or (@y_orig == @y_dest)
   end
 
-  def attempted_move_to_occupied_square
+  def attempted_move_to_occupied_square?
     not board[@x_dest][@y_dest].nil?
   end
   
-  def non_king_moving_backwards
+  def non_king_moving_backwards?
     if @current_player == :red 
       (@x_dest < @x_orig) and (board[@x_orig][@y_orig].isKing? == false)
     else
