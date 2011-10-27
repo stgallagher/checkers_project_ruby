@@ -24,9 +24,9 @@ class Game
       configure_coordinates(coordinates)
 
       message = move_validator
-      puts message unless message.nil?
-      if(message == nil)
-        @current_player = switch_player
+      puts message unless (message.nil? or message == "jumping move")
+      if(message == nil or message == "jumping move")
+        @current_player = switch_player unless (message == "jumping move" and jump_available? == true)
       end
     end
     puts display_game_ending_message  
@@ -51,6 +51,7 @@ class Game
     winner = (red_checkers_left == 0) ? :black : :red
     "\n\nCongratulations, #{winner}, You have won!!!"
   end
+  
 
   def switch_player
     @current_player == :red ? :black : :red
@@ -79,9 +80,13 @@ class Game
 
   def create_debug_board_and_play
     create_test_board
-    red_checker = Checker.new(4, 4, :red)
-    black_checker = Checker.new(6, 6, :black)
-    place_checker_on_board(red_checker)
+    red_checker1 = Checker.new(2, 4, :red)
+    red_checker2 = Checker.new(3, 3, :red)
+    red_checker3 = Checker.new(1, 1, :red)
+    black_checker = Checker.new(5, 3, :black)
+    place_checker_on_board(red_checker1)
+    place_checker_on_board(red_checker2)
+    place_checker_on_board(red_checker3)
     place_checker_on_board(black_checker)
     play_game
   end
@@ -195,6 +200,7 @@ class Game
     else
       move
       if jumping_move?
+        message = "jumping move"
         remove_jumped_checker
       end
       king_checkers_if_necessary

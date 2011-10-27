@@ -524,7 +524,7 @@ describe Game do
       @game.place_checker_on_board(jumped_checker)
       @game.black_checkers_left.should == 1
       @game.configure_coordinates([3, 3, 5, 5])
-      @game.move_validator.should == nil
+      @game.move_validator.should == "jumping move"
       @game.board[5][5].should equal(jumping_checker)
       @game.board[4][4].should == nil
       @game.black_checkers_left.should == 0
@@ -538,7 +538,7 @@ describe Game do
       @game.place_checker_on_board(jumped_checker)
       @game.red_checkers_left.should == 1
       @game.configure_coordinates([5, 5, 3, 3])
-      @game.move_validator.should == nil
+      @game.move_validator.should == "jumping move"
       @game.board[3][3].should equal(jumping_checker)
       @game.board[4][4].should == nil
       @game.red_checkers_left.should == 0
@@ -550,7 +550,7 @@ describe Game do
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
       @game.configure_coordinates([3, 3, 5, 5])
-      @game.move_validator.should == nil
+      @game.move_validator.should == "jumping move"
       @game.board[5][5].should equal(jumping_checker)
       @game.board[4][4].should == nil
     end
