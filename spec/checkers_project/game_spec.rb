@@ -20,7 +20,7 @@ describe Game do
       checker = Checker.new(3, 3, :red)
       @game.place_checker_on_board(checker)
       @game.board[3][3].should equal(checker)
-      @game.red_checkers.count.should == 13 
+      @game.red_checkers_left.should == 13 
     end
 
     it "should populate the board with checkers in the right positions" do
@@ -33,8 +33,8 @@ describe Game do
     end
 
     it "should have maintain a collection of checkers for each color" do
-      @game.red_checkers.count.should   == 12
-      @game.black_checkers.count.should == 12
+      @game.red_checkers_left.should   == 12
+      @game.black_checkers_left.should == 12
     end
   end
 
@@ -67,9 +67,21 @@ describe Game do
     end
 
     it "should end the game when all the checkers of one color are removed" do
+      @game.create_test_board
+      lone_red_checker = Checker.new(2, 2, :red)
+      lone_black_checker = Checker.new(5, 5, :black)
+      @game.place_checker_on_board(lone_red_checker) 
+      @game.place_checker_on_board(lone_black_checker)
       @game.game_over?.should == false
-      @game.red_checkers.clear
+      @game.board[2][2] = nil
       @game.game_over?.should == true 
+    end
+
+    it "should display appropriate game ending message telling who won" do
+      @game.create_test_board
+      lone_black_checker = Checker.new(5, 5, :black)
+      @game.place_checker_on_board(lone_black_checker)
+      @game.display_game_ending_message.should == "\n\nCongratulations, black, You have won!!!"
     end
   end
 
@@ -510,12 +522,12 @@ describe Game do
       jumped_checker = Checker.new(4, 4, :black)
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
-      @game.black_checkers.count.should == 13
+      @game.black_checkers_left.should == 1
       @game.configure_coordinates([3, 3, 5, 5])
       @game.move_validator.should == nil
       @game.board[5][5].should equal(jumping_checker)
       @game.board[4][4].should == nil
-      @game.black_checkers.count.should == 12
+      @game.black_checkers_left.should == 0
     end
     
     it "should remove a checker from the board and decrement opposing checker collection if that checker is jumped (for black)" do
@@ -524,12 +536,12 @@ describe Game do
       jumped_checker = Checker.new(4, 4, :red)
       @game.place_checker_on_board(jumping_checker)
       @game.place_checker_on_board(jumped_checker)
-      @game.red_checkers.count.should == 13
+      @game.red_checkers_left.should == 1
       @game.configure_coordinates([5, 5, 3, 3])
       @game.move_validator.should == nil
       @game.board[3][3].should equal(jumping_checker)
       @game.board[4][4].should == nil
-      @game.red_checkers.count.should == 12
+      @game.red_checkers_left.should == 0
     end
      
     it "should allow jumps if there is an opposing checker in place and a vacant spot to land" do

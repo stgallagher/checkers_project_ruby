@@ -4,4 +4,4 @@ require 'checkers_project'
 
 game = Game.new
 
-game.play_game
+game.create_debug_board_and_play

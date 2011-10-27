@@ -28,7 +28,8 @@ class Game
       if(message == nil)
         @current_player = switch_player
       end
-    end  
+    end
+    puts display_game_ending_message  
   end
   
   def configure_coordinates(coordinates)
@@ -43,7 +44,12 @@ class Game
   end
 
   def game_over?
-    (@red_checkers.count == 0) or (@black_checkers.count == 0)
+    (red_checkers_left == 0) or (black_checkers_left == 0)
+  end
+  
+  def display_game_ending_message
+    winner = (red_checkers_left == 0) ? :black : :red
+    "\n\nCongratulations, #{winner}, You have won!!!"
   end
 
   def switch_player
@@ -69,6 +75,15 @@ class Game
     @board = Array.new(8)
     8.times { |index| @board[index] = Array.new(8) }
     @board
+  end
+
+  def create_debug_board_and_play
+    create_test_board
+    red_checker = Checker.new(4, 4, :red)
+    black_checker = Checker.new(6, 6, :black)
+    place_checker_on_board(red_checker)
+    place_checker_on_board(black_checker)
+    play_game
   end
 
   def place_checker_on_board(checker)
@@ -116,7 +131,33 @@ class Game
       end
     end
   end
+  
+  def red_checkers_left
+    red_count = 0
 
+    @board.each do |row|
+      row.each do |location|
+        if (location.nil? == false) and (location.color == :red)
+          red_count += 1
+        end
+      end
+    end
+    red_count
+  end
+  
+  def black_checkers_left
+    black_count = 0
+
+    @board.each do |row|
+      row.each do |location|
+        if (location.nil? == false) and (location.color == :black)
+          black_count += 1
+        end
+      end
+    end
+    black_count
+  end
+  
   def move_validator
     message = nil
     
@@ -176,13 +217,18 @@ class Game
   def adjacent_positions
     
     if @current_player == :red
-
-      jump_positions = { "upper_left"  => board[@x_scan + 1][@y_scan + 1],
-                         "upper_right" => board[@x_scan + 1][@y_scan - 1],
-                         "lower_left"  => board[@x_scan - 1][@y_scan + 1],
-                         "lower_right" => board[@x_scan - 1][@y_scan - 1] }  
+      if @x_scan < 7 
+        jump_positions = { "upper_left"  => board[@x_scan + 1][@y_scan + 1],
+                           "upper_right" => board[@x_scan + 1][@y_scan - 1],
+                           "lower_left"  => board[@x_scan - 1][@y_scan + 1],
+                           "lower_right" => board[@x_scan - 1][@y_scan - 1] }
+      else
+        jump_positions = { "upper_left"  => nil,
+                           "upper_right" => nil,
+                           "lower_left"  => board[@x_scan - 1][@y_scan + 1],
+                           "lower_right" => board[@x_scan - 1][@y_scan - 1] }
+      end
     end
-
     if @current_player == :black
       if @x_scan < 7
         jump_positions = { "upper_left"  => board[@x_scan - 1][@y_scan - 1],
@@ -431,11 +477,6 @@ class Game
     
     removed_checker = @board[remove_checker_x_value][remove_checker_y_value]
     @board[remove_checker_x_value][remove_checker_y_value] = nil
-    if @current_player == :red
-      @black_checkers.delete(removed_checker)
-    else
-      @red_checkers.delete(removed_checker)
-    end
   end
 
   def out_of_bounds?(x, y)
