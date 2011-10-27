@@ -129,6 +129,9 @@ class Game
     
     when trying_to_move_opponents_checker? == true 
       message = "You cannot move an opponents checker"  
+     
+    when trying_to_move_more_than_one_space_and_not_jumping? == true
+      message = "You cannot move more than one space if not jumping"
 
     when attempted_non_diagonal_move? == true
       message = "You can only move a checker diagonally"
@@ -138,7 +141,10 @@ class Game
       
     when non_king_moving_backwards? == true
       message = "A non-king checker cannot move backwards"
-      
+    
+    when attempted_jump_of_empty_space? == true  
+      message = "You cannot jump an empty space"
+
     when attempted_jump_of_own_checker? == true
       message = "You cannot jump a checker of your own color"
       
@@ -371,7 +377,25 @@ class Game
     
     (jump_available? == true) and (not_taken_jump)   
   end          
-
+  
+  def attempted_jump_of_empty_space?
+    if jumping_move?
+      x_delta = (@x_dest > @x_orig) ? 1 : -1
+      y_delta = (@y_dest > @y_orig) ? 1 : -1
+      
+      if @current_player == :black
+       x_delta = (@x_dest < @x_orig) ? -1 : 1
+       y_delta = (@y_dest < @y_orig) ? -1 : 1
+      end
+ 
+      jumped_checker_x_value = @x_orig + x_delta
+      jumped_checker_y_value = @y_orig + y_delta
+    
+      jumped_checker = @board[jumped_checker_x_value][jumped_checker_y_value]
+      jumped_checker.nil?
+    end
+  end
+  
   def attempted_jump_of_own_checker?
     if jumping_move?
       x_delta = (@x_dest > @x_orig) ? 1 : -1
@@ -386,6 +410,7 @@ class Game
       jumped_checker_y_value = @y_orig + y_delta
     
       jumped_checker = @board[jumped_checker_x_value][jumped_checker_y_value]
+      
       jumping_checker = @board[@x_orig][@y_orig]
 
       jumped_checker.color == jumping_checker.color
@@ -393,7 +418,7 @@ class Game
   end
 
   def jumping_move?
-    (@x_dest - @x_orig).abs > 1 
+    (@x_dest - @x_orig).abs == 2 
   end
   
   def remove_jumped_checker
@@ -423,6 +448,10 @@ class Game
 
   def trying_to_move_opponents_checker?
     @current_player != board[@x_orig][@y_orig].color
+  end
+  
+  def trying_to_move_more_than_one_space_and_not_jumping?
+    (@x_dest - @x_orig).abs > 2
   end
 
   def attempted_non_diagonal_move?

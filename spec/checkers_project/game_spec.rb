@@ -139,6 +139,36 @@ describe Game do
       @game.move_validator.should == "You cannot move an opponents checker"
     end
     
+    it "should error if requested move is a jump of an empty space(for red)" do
+      @game.current_player = :red
+      @game.configure_coordinates([2, 2, 4, 4])
+      @game.move_validator.should == "You cannot jump an empty space"
+    end
+    
+    it "should error if requested move is a jump of an empty space(for black)" do
+      @game.current_player = :black
+      @game.configure_coordinates([5, 5, 3, 3])
+      @game.move_validator.should == "You cannot jump an empty space"
+    end
+    
+    it "should error if requested move is greater than one space and not a jump (for red)" do
+      @game.current_player = :red
+      @game.create_test_board
+      red_checker = Checker.new(2, 2, :red)
+      @game.place_checker_on_board(red_checker)
+      @game.configure_coordinates([2, 2, 5, 5])
+      @game.move_validator.should == "You cannot move more than one space if not jumping"
+    end
+    
+    it "should error if requested move is greater than one space and not a jump (for black)" do
+      @game.current_player = :black
+      @game.create_test_board
+      black_checker = Checker.new(5, 5, :black)
+      @game.place_checker_on_board(black_checker)
+      @game.configure_coordinates([5, 5, 2, 2])
+      @game.move_validator.should == "You cannot move more than one space if not jumping"
+    end
+
     it "should not allow non-diagonal moves" do
       not_moving_checker = @game.board[2][4]
       @game.configure_coordinates([2, 4, 3, 4])
